@@ -11,18 +11,37 @@
         "required": true,
         "default": "Deako Smart Home"
       },
-      "host": {
-        "title": "Hub IP Address",
-        "type": "string",
-        "required": true,
-        "format": "ipv4",
-        "description": "The IP address of your Deako Smart Hub on your local network"
-      },
-      "port": {
-        "title": "Port",
+      "discoveryTimeout": {
+        "title": "Discovery Timeout (seconds)",
         "type": "integer",
-        "default": 23,
-        "description": "TCP port for the Deako hub (default: 23)"
+        "default": 10,
+        "minimum": 5,
+        "maximum": 60,
+        "description": "How long to wait for the Deako WiFi bridge to appear via mDNS before giving up."
+      },
+      "pingInterval": {
+        "title": "Ping Interval (seconds)",
+        "type": "integer",
+        "default": 10,
+        "minimum": 5,
+        "maximum": 60,
+        "description": "How often to send a keep-alive ping to the Deako bridge."
+      },
+      "reconnectInterval": {
+        "title": "Reconnect Interval (seconds)",
+        "type": "integer",
+        "default": 15,
+        "minimum": 5,
+        "maximum": 120,
+        "description": "How long to wait before attempting to reconnect after a disconnection."
+      },
+      "refreshInterval": {
+        "title": "Device Refresh Interval (seconds)",
+        "type": "integer",
+        "default": 300,
+        "minimum": 60,
+        "maximum": 3600,
+        "description": "How often to request a full device list refresh to remove stale accessories."
       }
     }
   }
