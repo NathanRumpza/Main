@@ -1,0 +1,29 @@
+{
+  "pluginAlias": "DeakoSmartHome",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "Deako Smart Home"
+      },
+      "host": {
+        "title": "Hub IP Address",
+        "type": "string",
+        "required": true,
+        "format": "ipv4",
+        "description": "The IP address of your Deako Smart Hub on your local network"
+      },
+      "port": {
+        "title": "Port",
+        "type": "integer",
+        "default": 23,
+        "description": "TCP port for the Deako hub (default: 23)"
+      }
+    }
+  }
+}
