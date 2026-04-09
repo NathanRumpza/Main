@@ -177,6 +177,7 @@ body {
   gap: 10px;
 }
 .stock-waste { display: flex; gap: 10px; }
+.waste-slot { width: calc(var(--card-width) + 44px); }
 .foundations { display: flex; gap: 10px; }
 
 .card-slot {
