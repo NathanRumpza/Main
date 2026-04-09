@@ -53,19 +53,17 @@
   <div id="game-screen" class="screen">
     <div class="game-header">
       <div class="header-left">
-        <button id="quit-btn" class="header-btn">✕ Quit</button>
-        <div class="game-info">
-          <span class="stake-badge" id="stake-badge">Bronze</span>
-          <span class="stake-amount" id="stake-amount">100 coins at stake</span>
-        </div>
-      </div>
-      <div class="header-right">
+        <button id="quit-btn" class="header-btn">✕</button>
+        <span class="stake-badge" id="stake-badge">Bronze</span>
         <div class="coin-display">
           <span class="coin-icon">🪙</span>
           <span id="game-coins">1000</span>
         </div>
-        <button id="undo-btn" class="header-btn">↩ Undo</button>
-        <button id="hint-btn" class="header-btn">💡 Hint</button>
+      </div>
+      <div class="header-right">
+        <span id="move-counter" class="move-counter">0 moves</span>
+        <button id="undo-btn" class="header-btn">↩</button>
+        <button id="hint-btn" class="header-btn">💡</button>
       </div>
     </div>
     <div id="solitaire-board" class="solitaire-board">
