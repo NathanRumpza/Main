@@ -330,6 +330,7 @@ body {
 
 .card.selected { box-shadow: 0 0 0 3px var(--gold), 0 4px 15px rgba(240,192,64,0.5); transform: translateY(-4px); z-index: 60; }
 .card.hint-highlight { box-shadow: 0 0 0 3px #5f5, 0 4px 15px rgba(80,255,80,0.4); z-index: 55; }
+.hint-highlight-slot { box-shadow: 0 0 0 3px #5f5, 0 4px 15px rgba(80,255,80,0.4) !important; border-color: #5f5 !important; }
 .card.dragging {
   z-index: 1000 !important;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
