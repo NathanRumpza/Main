@@ -1073,6 +1073,10 @@
     badge.className = 'stake-badge ' + tier;
     $('#stake-amount').textContent = cost.toLocaleString() + ' coins at stake';
 
+    // Apply tier theme
+    const gameScreen = $('#game-screen');
+    gameScreen.className = 'screen theme-' + tier;
+
     deal();
     gameActive = true;
     showScreen('game');
