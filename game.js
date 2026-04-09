@@ -1031,7 +1031,11 @@
       drawFromStock();
     });
 
-    // Board clicks for card selection
+    // Board clicks for card selection (with double-click detection)
+    let lastClickTime = 0;
+    let lastClickLoc = '';
+    let lastClickIdx = -1;
+
     $('#solitaire-board').addEventListener('click', (e) => {
       if (!gameActive) return;
       if (dragState && dragState.dragging) return;
@@ -1045,6 +1049,20 @@
 
         // Stock cards handled separately
         if (loc === 'stock') return;
+
+        // Detect double-click: same card within 400ms
+        const now = Date.now();
+        if (loc === lastClickLoc && idx === lastClickIdx && now - lastClickTime < 400) {
+          lastClickTime = 0;
+          lastClickLoc = '';
+          lastClickIdx = -1;
+          selectedCard = null;
+          tryAutoMove(loc, idx);
+          return;
+        }
+        lastClickTime = now;
+        lastClickLoc = loc;
+        lastClickIdx = idx;
 
         trySelect(loc, idx);
         return;
@@ -1067,14 +1085,6 @@
         }
         return;
       }
-    });
-
-    // Double click for auto-foundation
-    $('#solitaire-board').addEventListener('dblclick', (e) => {
-      if (!gameActive) return;
-      const cardEl = e.target.closest('.card');
-      if (!cardEl || !cardEl.dataset.location) return;
-      tryAutoMove(cardEl.dataset.location, parseInt(cardEl.dataset.index));
     });
 
     // Header buttons
