@@ -31,6 +31,7 @@
   // Solitaire state
   let stock = [];
   let waste = [];
+  let wasteViewCount = 0; // how many waste cards are visible in the current fan
   let foundations = [[], [], [], []];
   let tableau = [[], [], [], [], [], [], []];
   let undoStack = [];
@@ -109,6 +110,7 @@
     stock = [];
     undoStack = [];
     selectedCard = null;
+    wasteViewCount = 0;
     moveCount = 0;
 
     let idx = 0;
@@ -128,6 +130,7 @@
     undoStack.push({
       stock: stock.map(c => ({ ...c })),
       waste: waste.map(c => ({ ...c })),
+      wasteViewCount,
       foundations: foundations.map(f => f.map(c => ({ ...c }))),
       tableau: tableau.map(t => t.map(c => ({ ...c }))),
     });
@@ -139,6 +142,7 @@
     const state = undoStack.pop();
     stock = state.stock;
     waste = state.waste;
+    wasteViewCount = state.wasteViewCount;
     foundations = state.foundations;
     tableau = state.tableau;
     selectedCard = null;
@@ -175,11 +179,11 @@
       : '<div class="slot-label">♻</div>';
     stockEl.className = 'card-slot stock-slot' + (stock.length === 0 ? ' empty-stock' : '');
 
-    // Waste — show up to 3 fanned cards
+    // Waste — show the current draw group fanned (1-3 cards)
     const wasteEl = $('#waste');
     wasteEl.innerHTML = '';
     if (waste.length > 0) {
-      const showCount = Math.min(3, waste.length);
+      const showCount = Math.min(wasteViewCount || 1, waste.length);
       const startIdx = waste.length - showCount;
       for (let i = 0; i < showCount; i++) {
         const card = waste[startIdx + i];
@@ -308,6 +312,7 @@
       stock = waste.reverse();
       stock.forEach(c => c.faceUp = false);
       waste = [];
+      wasteViewCount = 0;
     } else {
       saveState();
       const drawCount = Math.min(3, stock.length);
@@ -316,6 +321,7 @@
         card.faceUp = true;
         waste.push(card);
       }
+      wasteViewCount = drawCount;
     }
     selectedCard = null;
     clearHints();
@@ -383,6 +389,7 @@
 
       saveState();
       toPile.push(fromPile.pop());
+      if (fromLoc === 'waste') wasteViewCount = Math.max(1, wasteViewCount - 1);
       flipTopCard(fromLoc);
       moveCount++;
       return true;
@@ -396,6 +403,7 @@
       saveState();
       const moving = fromPile.splice(fromIdx);
       toPile.push(...moving);
+      if (fromLoc === 'waste') wasteViewCount = Math.max(1, wasteViewCount - 1);
       flipTopCard(fromLoc);
       moveCount++;
       return true;
@@ -423,6 +431,7 @@
         if (canMoveToFoundation(card, i)) {
           saveState();
           foundations[i].push(pile.pop());
+          if (location === 'waste') wasteViewCount = Math.max(1, wasteViewCount - 1);
           flipTopCard(location);
           moveCount++;
           selectedCard = null;
@@ -1020,18 +1029,10 @@
       });
     });
 
-    // Stock click
+    // Stock click — single handler for both draw and recycle
     $('#stock').addEventListener('click', (e) => {
       if (!gameActive) return;
-      if (!e.target.closest('.card') && !$('#stock').classList.contains('empty-stock')) return;
       drawFromStock();
-    });
-    // Also handle empty stock recycle
-    $('#stock').addEventListener('click', (e) => {
-      if (!gameActive) return;
-      if ($('#stock').classList.contains('empty-stock')) {
-        drawFromStock();
-      }
     });
 
     // Board clicks for card selection
