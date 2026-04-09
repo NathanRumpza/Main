@@ -175,16 +175,25 @@
       : '<div class="slot-label">♻</div>';
     stockEl.className = 'card-slot stock-slot' + (stock.length === 0 ? ' empty-stock' : '');
 
-    // Waste
+    // Waste — show up to 3 fanned cards
     const wasteEl = $('#waste');
     wasteEl.innerHTML = '';
     if (waste.length > 0) {
-      const card = waste[waste.length - 1];
-      const cardEl = createCardElement(card, 'waste', waste.length - 1);
-      cardEl.style.position = 'absolute';
-      cardEl.style.top = '0';
-      cardEl.style.left = '0';
-      wasteEl.appendChild(cardEl);
+      const showCount = Math.min(3, waste.length);
+      const startIdx = waste.length - showCount;
+      for (let i = 0; i < showCount; i++) {
+        const card = waste[startIdx + i];
+        const cardEl = createCardElement(card, 'waste', startIdx + i);
+        cardEl.style.position = 'absolute';
+        cardEl.style.top = '0';
+        cardEl.style.left = (i * 22) + 'px';
+        cardEl.style.zIndex = i + 1;
+        // Only the top card is clickable/selectable
+        if (i < showCount - 1) {
+          cardEl.style.pointerEvents = 'none';
+        }
+        wasteEl.appendChild(cardEl);
+      }
     }
 
     // Foundations
@@ -292,9 +301,12 @@
       waste = [];
     } else {
       saveState();
-      const card = stock.pop();
-      card.faceUp = true;
-      waste.push(card);
+      const drawCount = Math.min(3, stock.length);
+      for (let i = 0; i < drawCount; i++) {
+        const card = stock.pop();
+        card.faceUp = true;
+        waste.push(card);
+      }
     }
     selectedCard = null;
     clearHints();
