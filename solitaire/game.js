@@ -668,17 +668,6 @@
     hintCards.push({ ...best.to, isDestination: true });
     render();
   }
-        }
-      }
-    }
-
-    // No hint found — suggest drawing
-    if (stock.length > 0) {
-      const stockEl = $('#stock');
-      stockEl.style.boxShadow = '0 0 0 3px #5f5';
-      setTimeout(() => stockEl.style.boxShadow = '', 1500);
-    }
-  }
 
   function clearHints() {
     hintCards = [];
