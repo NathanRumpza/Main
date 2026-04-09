@@ -162,6 +162,74 @@ body {
   flex-direction: column;
 }
 
+/* === Tier Themes === */
+
+/* Bronze — classic green felt, traditional blue card backs */
+#game-screen.theme-bronze {
+  background: linear-gradient(180deg, #0f4d2a 0%, #1b7a40 60%, #145c30 100%);
+}
+.theme-bronze .card-back {
+  background: linear-gradient(135deg, #2255aa, #1a3d7a);
+  border-color: #4477cc;
+}
+.theme-bronze .card-back::after { content: '♠♥♣♦'; }
+.theme-bronze .card-slot { border-color: rgba(255,255,255,0.15); }
+.theme-bronze .game-header { background: rgba(0,0,0,0.3); }
+.theme-bronze .stake-badge { background: #cd7f32; }
+
+/* Silver — cool slate blue board, silver/gray card backs */
+#game-screen.theme-silver {
+  background: linear-gradient(180deg, #1a2a3a 0%, #2c4a66 60%, #1e3348 100%);
+}
+.theme-silver .card-back {
+  background: linear-gradient(135deg, #7a8a9a, #505e6e);
+  border-color: #a0aab4;
+}
+.theme-silver .card-back::after { content: '✦✧✦✧'; color: #d0d8e0; }
+.theme-silver .card-slot { border-color: rgba(160,180,200,0.2); }
+.theme-silver .game-header { background: rgba(15,25,40,0.5); }
+.theme-silver .stake-badge { background: #8a9aaa; }
+.theme-silver .card.selected { box-shadow: 0 0 0 3px #a0c0e0, 0 4px 15px rgba(160,200,240,0.5); }
+
+/* Gold — rich burgundy/mahogany board, ornate gold card backs */
+#game-screen.theme-gold {
+  background: linear-gradient(180deg, #3a1a1a 0%, #6b2a2a 40%, #4a1e1e 100%);
+}
+.theme-gold .card-back {
+  background: linear-gradient(135deg, #c8a030, #8a6a10);
+  border-color: #e0c050;
+}
+.theme-gold .card-back::after { content: '♛♛♛♛'; color: #fff3c0; }
+.theme-gold .card-slot { border-color: rgba(240,192,64,0.2); }
+.theme-gold .game-header { background: rgba(40,10,10,0.5); }
+.theme-gold .stake-badge { background: var(--gold-dark); color: #000; }
+.theme-gold .card.selected { box-shadow: 0 0 0 3px var(--gold), 0 4px 15px rgba(240,192,64,0.5); }
+.theme-gold .card-face {
+  background: #fffef5;
+  border-color: #d4c8a0;
+}
+
+/* Diamond — dark purple/neon board, holographic card backs */
+#game-screen.theme-diamond {
+  background: linear-gradient(180deg, #0d0620 0%, #1e0a45 40%, #2a1060 70%, #150835 100%);
+}
+.theme-diamond .card-back {
+  background: linear-gradient(135deg, #6a11cb, #2575fc, #6a11cb);
+  border-color: #a070ff;
+  box-shadow: 0 2px 12px rgba(100,50,255,0.3);
+}
+.theme-diamond .card-back::after { content: '◆◇◆◇'; color: #c0d0ff; }
+.theme-diamond .card-slot { border-color: rgba(150,100,255,0.25); }
+.theme-diamond .game-header { background: rgba(10,5,30,0.6); }
+.theme-diamond .stake-badge { background: #8a50ff; }
+.theme-diamond .card.selected { box-shadow: 0 0 0 3px #a070ff, 0 4px 20px rgba(150,100,255,0.6); }
+.theme-diamond .card.hint-highlight { box-shadow: 0 0 0 3px #0ff, 0 4px 15px rgba(0,255,255,0.4); }
+.theme-diamond .card-face {
+  background: #fafaff;
+  border-color: #c0b8e0;
+}
+.theme-diamond .coin-display { color: #c0a0ff; }
+
 .solitaire-board {
   flex: 1;
   padding: 12px;
