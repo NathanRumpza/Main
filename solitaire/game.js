@@ -250,11 +250,20 @@
       }
     }
 
-    // Highlight hints
+    // Highlight hints (source + destination)
     hintCards.forEach(h => {
       const container = $(`#${h.location}`);
-      if (container) {
-        const cards = container.querySelectorAll('.card');
+      if (!container) return;
+      const cards = container.querySelectorAll('.card');
+
+      if (h.isDestination) {
+        // For destination, highlight the top card or the empty slot
+        if (cards.length > 0) {
+          cards[cards.length - 1].classList.add('hint-highlight');
+        } else {
+          container.classList.add('hint-highlight-slot');
+        }
+      } else {
         if (cards[h.index]) cards[h.index].classList.add('hint-highlight');
       }
     });
@@ -533,18 +542,26 @@
   function findHint() {
     clearHints();
 
+    // Collect all possible moves, scored by usefulness
+    const moves = [];
+
+    // Helper: does moving from this location reveal a face-down card?
+    function revealsCard(location, index) {
+      const pile = getPile(location);
+      if (!pile || index === 0) return false;
+      return !pile[index - 1].faceUp;
+    }
+
+    // 1. Foundation moves (highest priority)
     // Check waste -> foundation
     if (waste.length > 0) {
       const card = waste[waste.length - 1];
       for (let i = 0; i < 4; i++) {
         if (canMoveToFoundation(card, i)) {
-          hintCards.push({ location: 'waste', index: waste.length - 1 });
-          render();
-          return;
+          moves.push({ from: { location: 'waste', index: waste.length - 1 }, to: { location: `foundation-${i}`, index: 0 }, score: 100 });
         }
       }
     }
-
     // Check tableau -> foundation
     for (let col = 0; col < 7; col++) {
       const pile = tableau[col];
@@ -552,40 +569,96 @@
       const card = pile[pile.length - 1];
       for (let i = 0; i < 4; i++) {
         if (canMoveToFoundation(card, i)) {
-          hintCards.push({ location: `tableau-${col}`, index: pile.length - 1 });
-          render();
-          return;
+          const reveals = revealsCard(`tableau-${col}`, pile.length - 1);
+          moves.push({ from: { location: `tableau-${col}`, index: pile.length - 1 }, to: { location: `foundation-${i}`, index: 0 }, score: reveals ? 95 : 90 });
         }
       }
     }
 
-    // Check waste -> tableau
-    if (waste.length > 0) {
-      const card = waste[waste.length - 1];
-      for (let col = 0; col < 7; col++) {
-        if (canMoveToTableau(card, col)) {
-          hintCards.push({ location: 'waste', index: waste.length - 1 });
-          render();
-          return;
-        }
-      }
-    }
-
-    // Check tableau -> tableau
+    // 2. Tableau moves that reveal face-down cards (high priority)
     for (let fromCol = 0; fromCol < 7; fromCol++) {
       const fromPile = tableau[fromCol];
       for (let i = 0; i < fromPile.length; i++) {
         const card = fromPile[i];
         if (!card.faceUp) continue;
+        const reveals = revealsCard(`tableau-${fromCol}`, i);
         for (let toCol = 0; toCol < 7; toCol++) {
           if (fromCol === toCol) continue;
-          if (canMoveToTableau(card, toCol)) {
-            // Skip if moving a King to an empty column from another pile start
-            if (card.rank === 'K' && i === 0 && tableau[toCol].length === 0) continue;
-            hintCards.push({ location: `tableau-${fromCol}`, index: i });
-            render();
-            return;
+          if (!canMoveToTableau(card, toCol)) continue;
+
+          // Skip: moving a King to an empty column when nothing is revealed
+          if (card.rank === 'K' && tableau[toCol].length === 0 && !reveals) continue;
+
+          // Skip: moving bottom face-up card to empty column (just shuffling, no reveal)
+          if (tableau[toCol].length === 0 && i === 0) continue;
+
+          if (reveals) {
+            moves.push({ from: { location: `tableau-${fromCol}`, index: i }, to: { location: `tableau-${toCol}`, index: 0 }, score: 80 });
+          } else {
+            // Only suggest non-revealing moves if they consolidate (build longer runs)
+            // Lower priority
+            moves.push({ from: { location: `tableau-${fromCol}`, index: i }, to: { location: `tableau-${toCol}`, index: 0 }, score: 20 });
           }
+        }
+      }
+    }
+
+    // 3. Waste -> tableau (medium priority)
+    if (waste.length > 0) {
+      const card = waste[waste.length - 1];
+      for (let col = 0; col < 7; col++) {
+        if (canMoveToTableau(card, col)) {
+          moves.push({ from: { location: 'waste', index: waste.length - 1 }, to: { location: `tableau-${col}`, index: 0 }, score: 50 });
+        }
+      }
+    }
+
+    // 4. King to empty column (only if it reveals a card)
+    for (let fromCol = 0; fromCol < 7; fromCol++) {
+      const fromPile = tableau[fromCol];
+      for (let i = 0; i < fromPile.length; i++) {
+        const card = fromPile[i];
+        if (!card.faceUp || card.rank !== 'K') continue;
+        if (i === 0) continue; // Already at base, no point
+        const reveals = revealsCard(`tableau-${fromCol}`, i);
+        if (!reveals) continue;
+        for (let toCol = 0; toCol < 7; toCol++) {
+          if (fromCol === toCol) continue;
+          if (tableau[toCol].length !== 0) continue;
+          moves.push({ from: { location: `tableau-${fromCol}`, index: i }, to: { location: `tableau-${toCol}`, index: 0 }, score: 75 });
+          break; // Only need one empty column
+        }
+      }
+    }
+
+    if (moves.length === 0) {
+      // No moves — suggest drawing from stock
+      if (stock.length > 0) {
+        const stockEl = $('#stock');
+        stockEl.style.boxShadow = '0 0 0 3px #5f5';
+        setTimeout(() => stockEl.style.boxShadow = '', 1500);
+      }
+      return;
+    }
+
+    // Deduplicate (same from location), keep highest scored
+    const seen = new Set();
+    const unique = [];
+    moves.sort((a, b) => b.score - a.score);
+    for (const m of moves) {
+      const key = m.from.location + ':' + m.from.index;
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(m);
+      }
+    }
+
+    // Show the best hint — highlight both source and destination
+    const best = unique[0];
+    hintCards.push(best.from);
+    hintCards.push({ ...best.to, isDestination: true });
+    render();
+  }
         }
       }
     }
@@ -601,6 +674,7 @@
   function clearHints() {
     hintCards = [];
     $$('.hint-highlight').forEach(el => el.classList.remove('hint-highlight'));
+    $$('.hint-highlight-slot').forEach(el => el.classList.remove('hint-highlight-slot'));
   }
 
   // ---- Give Up / Quit ----
