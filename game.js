@@ -174,6 +174,10 @@
   }
 
   function render() {
+    // Move counter
+    const mc = $('#move-counter');
+    if (mc) mc.textContent = moveCount + (moveCount === 1 ? ' move' : ' moves');
+
     // Stock
     const stockEl = $('#stock');
     stockEl.innerHTML = stock.length > 0
