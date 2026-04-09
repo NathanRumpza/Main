@@ -403,25 +403,45 @@
   }
 
   // ---- Double click: auto-move to foundation ----
-  function tryAutoFoundation(location, index) {
+  function tryAutoMove(location, index) {
     const pile = getPile(location);
-    if (!pile || index !== pile.length - 1) return false;
+    if (!pile || !pile[index] || !pile[index].faceUp) return false;
     const card = pile[index];
-    if (!card || !card.faceUp) return false;
 
-    for (let i = 0; i < 4; i++) {
-      if (canMoveToFoundation(card, i)) {
-        saveState();
-        foundations[i].push(pile.pop());
-        flipTopCard(location);
-        moveCount++;
-        selectedCard = null;
-        clearHints();
-        render();
-        checkWin();
-        return true;
+    // 1. Try foundations (only top card of a pile)
+    if (index === pile.length - 1) {
+      for (let i = 0; i < 4; i++) {
+        if (canMoveToFoundation(card, i)) {
+          saveState();
+          foundations[i].push(pile.pop());
+          flipTopCard(location);
+          moveCount++;
+          selectedCard = null;
+          clearHints();
+          render();
+          checkWin();
+          return true;
+        }
       }
     }
+
+    // 2. Try tableau columns (supports moving stacks)
+    const fromCol = location.startsWith('tableau-') ? parseInt(location.split('-')[1]) : -1;
+    for (let col = 0; col < 7; col++) {
+      if (col === fromCol) continue;
+      if (canMoveToTableau(card, col)) {
+        // Skip moving a King to an empty column if it's already at the base
+        if (card.rank === 'K' && index === 0 && tableau[col].length === 0) continue;
+        if (tryMove(location, index, `tableau-${col}`)) {
+          selectedCard = null;
+          clearHints();
+          render();
+          checkWin();
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -983,7 +1003,7 @@
       if (!gameActive) return;
       const cardEl = e.target.closest('.card');
       if (!cardEl || !cardEl.dataset.location) return;
-      tryAutoFoundation(cardEl.dataset.location, parseInt(cardEl.dataset.index));
+      tryAutoMove(cardEl.dataset.location, parseInt(cardEl.dataset.index));
     });
 
     // Header buttons
