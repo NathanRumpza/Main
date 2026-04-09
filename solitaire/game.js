@@ -604,8 +604,15 @@
           if (reveals) {
             moves.push({ from: { location: `tableau-${fromCol}`, index: i }, to: { location: `tableau-${toCol}`, index: 0 }, score: 80 });
           } else {
-            // Only suggest non-revealing moves if they consolidate (build longer runs)
-            // Lower priority
+            // Non-revealing move: only suggest if the card left behind can go to foundation
+            if (i > 0 && fromPile[i - 1].faceUp) {
+              const exposed = fromPile[i - 1];
+              let exposedUseful = false;
+              for (let f = 0; f < 4; f++) {
+                if (canMoveToFoundation(exposed, f)) { exposedUseful = true; break; }
+              }
+              if (!exposedUseful) continue;
+            }
             moves.push({ from: { location: `tableau-${fromCol}`, index: i }, to: { location: `tableau-${toCol}`, index: 0 }, score: 20 });
           }
         }
