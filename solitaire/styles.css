@@ -129,6 +129,27 @@ body {
 
 .menu-hint { opacity: 0.5; font-size: 0.85rem; margin-top: 5px; }
 
+.free-coins-btn {
+  margin-top: 16px;
+  background: linear-gradient(180deg, #5c5, #3a3);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(50,200,50,0.3);
+  transition: all 0.2s;
+  animation: pulse 2s infinite;
+}
+.free-coins-btn:active { transform: scale(0.96); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 4px 15px rgba(50,200,50,0.3); }
+  50% { box-shadow: 0 4px 25px rgba(50,200,50,0.6); }
+}
+
 /* === Game Header === */
 .game-header {
   display: flex;

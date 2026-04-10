@@ -252,10 +252,14 @@
       const container = $(`#${location}`);
       if (container) {
         const cards = container.querySelectorAll('.card');
-        const pile = getPile(location);
-        for (let i = index; i < pile.length; i++) {
-          const ci = i - (location.startsWith('tableau') ? 0 : 0);
-          if (cards[ci]) cards[ci].classList.add('selected');
+        if (location === 'waste') {
+          // Waste: highlight the last DOM element (top card)
+          if (cards.length > 0) cards[cards.length - 1].classList.add('selected');
+        } else {
+          // Tableau: highlight from index onwards
+          for (let i = index; i < cards.length; i++) {
+            if (cards[i]) cards[i].classList.add('selected');
+          }
         }
       }
     }
@@ -884,15 +888,10 @@
     const segments = wheelMultipliers.length;
     const arc = (2 * Math.PI) / segments;
 
-    // Pick a random winning segment
-    const winIdx = Math.floor(Math.random() * segments);
-    // The pointer is at top (angle 0 = 3 o'clock, so top = -PI/2)
-    // We want the winning segment to be at the top
-    // Segment i covers angle [i*arc, (i+1)*arc] — center at (i+0.5)*arc
-    // We need rotation so that the center of winIdx is at -PI/2 (top)
-    const targetAngle = -(winIdx + 0.5) * arc - Math.PI / 2;
-    const fullSpins = 5 + Math.random() * 3; // 5-8 full spins
-    const totalRotation = fullSpins * 2 * Math.PI + (targetAngle - (wheelAngle % (2 * Math.PI)));
+    // Spin 5-8 full rotations plus a random offset
+    const fullSpins = 5 + Math.floor(Math.random() * 3);
+    const randomOffset = Math.random() * 2 * Math.PI;
+    const totalRotation = fullSpins * 2 * Math.PI + randomOffset;
 
     const startAngle = wheelAngle;
     const duration = 4000;
@@ -911,7 +910,11 @@
       } else {
         wheelAngle = current;
         wheelSpinning = false;
-        showWheelResult(wheelMultipliers[winIdx]);
+        // Read which segment the pointer actually landed on
+        // Pointer is at top (-PI/2). In wheel-local coords: -PI/2 - rotation
+        let pointerAngle = ((-Math.PI / 2 - wheelAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        let landedIdx = Math.floor(pointerAngle / arc) % segments;
+        showWheelResult(wheelMultipliers[landedIdx]);
       }
     }
 
@@ -978,6 +981,9 @@
     const pile = getPile(location);
     if (!pile || !pile[index] || !pile[index].faceUp) return;
 
+    // For waste, only the top card is draggable
+    if (location === 'waste' && index !== pile.length - 1) return;
+
     // Start potential drag
     dragState = {
       location,
@@ -1007,7 +1013,13 @@
       const cards = container.querySelectorAll('.card');
       const pile = getPile(dragState.location);
 
-      for (let i = dragState.index; i < pile.length; i++) {
+      // For waste, grab the last DOM element (the top card)
+      // For tableau, grab from the drag index onwards
+      const startDom = dragState.location === 'waste'
+        ? cards.length - 1
+        : dragState.index;
+
+      for (let i = startDom; i < cards.length; i++) {
         const el = cards[i];
         if (el) {
           const rect = el.getBoundingClientRect();
@@ -1020,7 +1032,7 @@
           el.style.left = rect.left + 'px';
           el.style.top = rect.top + 'px';
           el.style.width = rect.width + 'px';
-          el.style.zIndex = 1000 + (i - dragState.index);
+          el.style.zIndex = 1000 + (i - startDom);
         }
       }
       dragState.offsetX = 0;
@@ -1205,6 +1217,14 @@
       showScreen('menu');
     });
 
+    // Free coins when too low to play
+    $('#free-coins-btn').addEventListener('click', () => {
+      coins += 500;
+      saveCoins();
+      updateCoinDisplays();
+      updateTierButtons();
+    });
+
     // Keyboard
     document.addEventListener('keydown', (e) => {
       if (!gameActive) return;
@@ -1250,6 +1270,11 @@
       const cost = parseInt(btn.dataset.cost);
       btn.disabled = coins < cost;
     });
+    // Show free coins button when player can't afford any game
+    const freeBtn = $('#free-coins-btn');
+    if (freeBtn) {
+      freeBtn.style.display = coins < 100 ? '' : 'none';
+    }
   }
 
   // ---- Init ----
