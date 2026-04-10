@@ -1234,7 +1234,6 @@
     const badge = $('#stake-badge');
     badge.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
     badge.className = 'stake-badge ' + tier;
-    $('#stake-amount').textContent = cost.toLocaleString() + ' coins at stake';
 
     // Apply tier theme
     const gameScreen = $('#game-screen');
