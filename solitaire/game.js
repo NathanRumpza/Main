@@ -39,7 +39,6 @@
   let dragState = null;
   let hintCards = [];
   let moveCount = 0;
-  let movesAtLastRecycle = -1;
   let gameActive = false;
 
   // ---- DOM refs ----
@@ -113,7 +112,6 @@
     selectedCard = null;
     wasteViewCount = 0;
     moveCount = 0;
-    movesAtLastRecycle = -1;
 
     let idx = 0;
     for (let col = 0; col < 7; col++) {
@@ -318,16 +316,7 @@
   function drawFromStock() {
     if (stock.length === 0) {
       if (waste.length === 0) return;
-      // Check if we made any progress since last recycle
-      if (movesAtLastRecycle === moveCount) {
-        // Full pass with no moves — stuck
-        if (!hasAnyMoves()) {
-          showNoMovesModal();
-          return;
-        }
-      }
       saveState();
-      movesAtLastRecycle = moveCount;
       stock = waste.reverse();
       stock.forEach(c => c.faceUp = false);
       waste = [];
@@ -558,72 +547,6 @@
       autoComplete();
       return;
     }
-    if (gameActive && !hasAnyMoves()) {
-      showNoMovesModal();
-    }
-  }
-
-  function hasAnyMoves() {
-    // Check waste top card for moves
-    if (waste.length > 0) {
-      const card = waste[waste.length - 1];
-      for (let i = 0; i < 4; i++) {
-        if (canMoveToFoundation(card, i)) return true;
-      }
-      for (let col = 0; col < 7; col++) {
-        if (canMoveToTableau(card, col)) return true;
-      }
-    }
-
-    // Check tableau cards for moves
-    for (let fromCol = 0; fromCol < 7; fromCol++) {
-      const pile = tableau[fromCol];
-      if (pile.length === 0) continue;
-
-      // Top card to foundation?
-      const top = pile[pile.length - 1];
-      for (let i = 0; i < 4; i++) {
-        if (canMoveToFoundation(top, i)) return true;
-      }
-
-      // Any face-up card to another tableau column?
-      for (let r = 0; r < pile.length; r++) {
-        if (!pile[r].faceUp) continue;
-        for (let toCol = 0; toCol < 7; toCol++) {
-          if (fromCol === toCol) continue;
-          if (canMoveToTableau(pile[r], toCol)) return true;
-        }
-      }
-    }
-
-    // Can draw from stock?
-    if (stock.length > 0) return true;
-
-    // Can recycle waste? Only counts if we haven't already been through
-    // a full pass without making progress
-    if (waste.length > 0 && moveCount > movesAtLastRecycle) return true;
-
-    return false;
-  }
-
-  function showNoMovesModal() {
-    if (!gameActive) return;
-    gameActive = false;
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal-box">
-        <h3>No Moves Left</h3>
-        <p>There are no more available moves. You lose your ${currentCost.toLocaleString()} coin stake.</p>
-        <div class="modal-buttons">
-          <button class="modal-btn confirm" id="no-moves-btn">OK</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.querySelector('#no-moves-btn').addEventListener('click', () => {
-      overlay.remove();
-      handleLose();
-    });
   }
 
   function handleWin() {
