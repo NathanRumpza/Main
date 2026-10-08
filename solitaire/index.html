@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Solitaire">
+  <meta name="theme-color" content="#0f4d2a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Solitaire Prize Wheel</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Main Menu Screen -->
+  <div id="menu-screen" class="screen active">
+    <div class="menu-container">
+      <h1 class="game-title">Solitaire<br><span class="title-accent">Prize Wheel</span></h1>
+      <div class="coin-display-large">
+        <span class="coin-icon">🪙</span>
+        <span id="menu-coins">1000</span>
+      </div>
+      <h2 class="tier-heading">Choose Your Stakes</h2>
+      <div class="tier-grid">
+        <button class="tier-btn tier-bronze" data-cost="100" data-tier="bronze">
+          <div class="tier-name">Bronze</div>
+          <div class="tier-cost">100 coins</div>
+          <div class="tier-multiplier">Win up to 5x</div>
+        </button>
+        <button class="tier-btn tier-silver" data-cost="500" data-tier="silver">
+          <div class="tier-name">Silver</div>
+          <div class="tier-cost">500 coins</div>
+          <div class="tier-multiplier">Win up to 8x</div>
+        </button>
+        <button class="tier-btn tier-gold" data-cost="1000" data-tier="gold">
+          <div class="tier-name">Gold</div>
+          <div class="tier-cost">1,000 coins</div>
+          <div class="tier-multiplier">Win up to 12x</div>
+        </button>
+        <button class="tier-btn tier-diamond" data-cost="5000" data-tier="diamond">
+          <div class="tier-name">Diamond</div>
+          <div class="tier-cost">5,000 coins</div>
+          <div class="tier-multiplier">Win up to 20x</div>
+        </button>
+      </div>
+      <p class="menu-hint">Win the solitaire game to spin the prize wheel!</p>
+      <button id="free-coins-btn" class="free-coins-btn" style="display:none;">Claim 500 Free Coins</button>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <div class="header-left">
+        <button id="quit-btn" class="header-btn">✕</button>
+        <span class="stake-badge" id="stake-badge">Bronze</span>
+        <div class="coin-display">
+          <span class="coin-icon">🪙</span>
+          <span id="game-coins">1000</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="move-counter" class="move-counter">0 moves</span>
+        <button id="undo-btn" class="header-btn">↩</button>
+        <button id="hint-btn" class="header-btn">💡</button>
+      </div>
+    </div>
+    <div id="solitaire-board" class="solitaire-board">
+      <!-- Top row: stock, waste, foundations -->
+      <div class="top-row">
+        <div class="stock-waste">
+          <div id="stock" class="card-slot stock-slot">
+            <div class="slot-label">♻</div>
+          </div>
+          <div id="waste" class="card-slot waste-slot"></div>
+        </div>
+        <div class="foundations">
+          <div id="foundation-0" class="card-slot foundation-slot" data-suit=""><div class="slot-label">♠</div></div>
+          <div id="foundation-1" class="card-slot foundation-slot" data-suit=""><div class="slot-label">♥</div></div>
+          <div id="foundation-2" class="card-slot foundation-slot" data-suit=""><div class="slot-label">♣</div></div>
+          <div id="foundation-3" class="card-slot foundation-slot" data-suit=""><div class="slot-label">♦</div></div>
+        </div>
+      </div>
+      <!-- Tableau -->
+      <div class="tableau">
+        <div id="tableau-0" class="card-slot tableau-slot"></div>
+        <div id="tableau-1" class="card-slot tableau-slot"></div>
+        <div id="tableau-2" class="card-slot tableau-slot"></div>
+        <div id="tableau-3" class="card-slot tableau-slot"></div>
+        <div id="tableau-4" class="card-slot tableau-slot"></div>
+        <div id="tableau-5" class="card-slot tableau-slot"></div>
+        <div id="tableau-6" class="card-slot tableau-slot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win Screen with Prize Wheel -->
+  <div id="wheel-screen" class="screen">
+    <div class="wheel-container">
+      <h2 class="wheel-title">You Won! 🎉</h2>
+      <p class="wheel-subtitle">Spin the wheel to multiply your <span id="wheel-stake">100</span> coin stake!</p>
+      <div class="wheel-wrapper">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="wheel-canvas" width="400" height="400"></canvas>
+      </div>
+      <button id="spin-btn" class="spin-btn">SPIN!</button>
+      <div id="wheel-result" class="wheel-result hidden">
+        <div class="result-multiplier" id="result-multiplier">5x</div>
+        <div class="result-coins" id="result-coins">+500 coins!</div>
+        <button id="collect-btn" class="collect-btn">Collect Winnings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lose Screen -->
+  <div id="lose-screen" class="screen">
+    <div class="lose-container">
+      <h2 class="lose-title">Game Over</h2>
+      <p class="lose-text">You lost <span id="lost-amount">100</span> coins.</p>
+      <div class="coin-display-large">
+        <span class="coin-icon">🪙</span>
+        <span id="lose-coins">900</span> <span class="remaining-label">remaining</span>
+      </div>
+      <button id="lose-menu-btn" class="menu-btn">Back to Menu</button>
+    </div>
+  </div>
+
+  <!-- Bankrupt Screen -->
+  <div id="bankrupt-screen" class="screen">
+    <div class="bankrupt-container">
+      <h2 class="bankrupt-title">Out of Coins!</h2>
+      <p class="bankrupt-text">Don't worry, here's a fresh start.</p>
+      <button id="bankrupt-btn" class="menu-btn">Claim 1,000 Free Coins</button>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "Solitaire Prize Wheel",
+  "short_name": "Solitaire",
+  "description": "Classic 3-card Klondike Solitaire with a prize wheel and coin economy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f4d2a",
+  "theme_color": "#0f4d2a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
